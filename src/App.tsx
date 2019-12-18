@@ -16,14 +16,27 @@ function Index() {
             const url = 'http://localhost:8000/rest-auth/user/';
             const withCredentials = true;
             const method = 'get';
+
+            // this is the part that took me 2 weeks to figure out!
+            // also had to make a change on the django backend.
+            // REST_FRAMEWORK = {
+            //     # Use Django's standard `django.contrib.auth` permissions,
+            //     # or allow read-only access for unauthenticated users.
+            //     #'DEFAULT_PERMISSION_CLASSES': [
+            //     #    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+            //     #],
+            //     # adding this fix the logout 403 crrf errors but broke /rest-auth/user GET
+            //     # which now gets 401 unauthorized
+            //     'DEFAULT_AUTHENTICATION_CLASSES': (
+            //         'rest_framework.authentication.TokenAuthentication',
+            //     )
+            // }
             const headers = {
                 "Authorization": "Token " + authTokens['key'] + " "
             };
             axios.request({method, url, withCredentials, headers}).then(response => {
                 console.log('Login() response is ', response);
-                // setAppUser({...appUser, ...response.data});
                 setAppUser((appUser) => ({...appUser, ...response.data}));
-                //setLoggedIn(true);
             })
             //    .catch(error => { setAppUser(null); setLoggedIn(false); })
         }
