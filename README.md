@@ -93,3 +93,34 @@ npm install --save styled-components axios
 ```
 
 I added the file `src/PrivateRoute.jsx` based on the [src/PrivateRoute.js](https://gist.github.com/DennyScott/a1f00ac31b9b14bbd889f4b39a970e81/raw/67ed2d00e15324da33588402b9966157028c41d7/react-hook-auth-block6.jsx)
+
+# Finally got it working.
+
+Here is a demo of it working.
+
+## Login
+
+Go to http://localhost:3000 and you should see:
+
+![alt text](imgs/home_not_logged_in.png)
+
+Click on the "Admin Page" link or the "Login" link and you should see.
+
+![alt text](imgs/login.png)
+
+In the above login form enter the credentials of a user that you have create with the django admin panel.
+Now you should see.
+
+![alt text](imgs/logged_in.png)
+
+Click on the "Home" link and you should see:
+
+![alt text](imgs/home_logged_in.png)
+
+Sheldon is Plankton's first name.  I bet you didn't know that!
+
+To logout click on the "Admin Page" link and click the logout button.
+
+![alt text](imgs/logout.png)
+
+
