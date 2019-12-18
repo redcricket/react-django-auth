@@ -1,6 +1,13 @@
 # react-django-auth
 
 This my attempt to learn how to develop react applications with TypeScript.
+It is my intention to hook up this front end to a Django backend with 
+a very standard django-auth-rest installed and configured.
+
+You can see how to set up the intended backend here: 
+https://github.com/redcricket/react_django_tut_with_auth
+
+## Set up steps I followed.
 
 I initialized this project like so:
 
