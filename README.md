@@ -131,3 +131,33 @@ To logout click on the "Admin Page" link and click the logout button.
 ![alt text](imgs/logout.png)
 
 
+# Getting Signup to Work
+
+django-auth has and endpoint:
+
+http://localhost:8000/accounts/signup/
+
+it expects a playload of:
+
+```typescript
+csrfmiddlewaretoken: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+username: bubba1
+email: bubba1@bubba.com
+password1: password1234
+password2: password1234
+```
+
+The trick is how do I get the value fo csrfmiddlewaretoken?
+
+I will try to follow the documetation in these web pages:
+
+https://docs.djangoproject.com/en/2.1/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-or-csrf-cookie-httponly-is-true
+
+the above recommends https://github.com/js-cookie/js-cookie/
+
+to use js-cookie I install as per the doc:
+
+```
+npm i js-cookie
+```
+
