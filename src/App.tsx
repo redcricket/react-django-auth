@@ -67,9 +67,11 @@ function OldIndex() {
 
 function Index() {
     const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+    const [errorMessage, setErrorMessage] = useState("");
     const {authTokens} = useAuth();
     const key = sessionStorage.getItem('key');
     console.log('Index() before useEffect key is, ', key);
+    console.log('Index() before useEffect appUser is, ', appUser);
     useEffect(()=> {
         if (key) {
             const url = 'http://localhost:8000/rest-auth/user/';
@@ -101,16 +103,42 @@ function Index() {
                 setAppUser((appUser) => ({...appUser, ...response.data}));
             })
             //    .catch(error => { setAppUser(null); setLoggedIn(false); })
+                .catch( (error) => { // Error
+        console.log('Index useEffect catch error error is ', error);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            // console.log('postSignup catch if error.response is', error.response);
+            // console.log('error.response.data is ', error.response.data);
+            // console.log('error.response.data keys is ', Object.keys(error.response.data));
+            // const errMsgs = Object.values(error.response.data).join(':');
+            // console.log('error.response.status is ', error.response.status);
+            // console.log('error.ressponse.headers is ', error.response.headers);
+            setErrorMessage(Object.values(error.response.data).join(':'));
+        } else if (error.request) {
+            // The request was made but no response was received
+            // `error.request` is an instance of XMLHttpRequest in the
+            // browser and an instance of
+            // http.ClientRequest in node.js
+            console.log('postSignup catch error error.request is ', error.request);
+            setErrorMessage('postSignup catch error error.request is '+ error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('ELSE Error', error.message);
+            setErrorMessage(error.message)
         }
-    }, [key]);
-    // }, [authTokens]);
+        console.log('Index() useEffect catch error', error.config);
+    });
+}
+}, [key]);
+// }, [authTokens]);
 // const isAuthenticated = useAuth();
-    return key ? (
-        <h2>Home you are logged in. {appUser.first_name || 'No first name'} email is {appUser.email}</h2>
+return key ? (
+    <h2>{errorMessage} Home you are logged in. {appUser.first_name || 'No first name'} email is {appUser.email}</h2>
     ) : (
         <Router>
             <div>
-                <h2>Home you not logged in.</h2>
+                <h2>{errorMessage} Home you not logged in.</h2>
                 <nav>
                     <ul>
                         <li> <Link to="/login">Login</Link> </li>
@@ -306,7 +334,7 @@ function Signup () {
                     console.log('ELSE Error', error.message);
                     setErrorMessage(error.message)
                 }
-                console.log(error.config);
+                console.log('Signup postSignup catch error', error.config);
             });
     } // end postSignup
     if( isSignedUp ) {
@@ -384,7 +412,9 @@ function Login (props: RouteComponentProps<TParams>) {
             result => {
                 // console.log('Login.postLogin.else result is :', result);
                 if (result.status === 200) {
-                    sessionStorage.setItem('key', result.data);
+                    // sessionStorage.setItem('key', JSON.stringify(result.data['key']));
+                    sessionStorage.setItem('key', result.data['key']);
+                    console.log('XXX postLogin setting key to :', result.data['key']);
                     setAuthTokens(result.data);
                 } else {
                     setIsError(true);
