@@ -8,67 +8,10 @@ import { Card, Logo, Form, Input, Button } from "./components/AuthForm";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// function oldIndex() { return <h2>Home</h2>; }
-function OldIndex() {
-    const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
-    const {authTokens} = useAuth();
-    useEffect(()=> {
-        if (authTokens) {
-            const url = 'http://localhost:8000/rest-auth/user/';
-            const withCredentials = true;
-            const method = 'get';
-
-            // this is the part that took me 2 weeks to figure out!
-            // also had to make a change on the django backend.
-            // REST_FRAMEWORK = {
-            //     # Use Django's standard `django.contrib.auth` permissions,
-            //     # or allow read-only access for unauthenticated users.
-            //     #'DEFAULT_PERMISSION_CLASSES': [
-            //     #    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-            //     #],
-            //     # adding this fix the logout 403 crrf errors but broke /rest-auth/user GET
-            //     # which now gets 401 unauthorized
-            //     'DEFAULT_AUTHENTICATION_CLASSES': (
-            //         'rest_framework.authentication.TokenAuthentication',
-            //     )
-            // }
-            //
-            // the token is what we got from the backend when we logged in.
-            const headers = {
-                "Authorization": "Token " + authTokens['key'] + " "
-            };
-            axios.request({method, url, withCredentials, headers}).then(response => {
-                console.log('Login() response is ', response);
-                setAppUser((appUser) => ({...appUser, ...response.data}));
-            })
-            //    .catch(error => { setAppUser(null); setLoggedIn(false); })
-        }
-    }, [authTokens]);
-    // const isAuthenticated = useAuth();
-    return authTokens ? (
-        <h2>Home you are logged in. {appUser.first_name || 'No first name'} email is {appUser.email}</h2>
-    ) : (
-        <Router>
-            <div>
-                <h2>Home you not logged in.</h2>
-                <nav>
-                    <ul>
-                        <li> <Link to="/login">Login</Link> </li>
-                        <li> <Link to="/signup">Sign Up</Link> </li>
-                    </ul>
-                </nav>
-
-                <Route path="/login" component={Login} />
-                <Route path="/signup" component={Signup} />
-            </div>
-        </Router>
-    );
-}
-
 function Index() {
     const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
     const [errorMessage, setErrorMessage] = useState("");
-    const {authTokens} = useAuth();
+    // const {authTokens} = useAuth();
     const key = sessionStorage.getItem('key');
     console.log('Index() before useEffect key is, ', key);
     console.log('Index() before useEffect appUser is, ', appUser);
@@ -101,36 +44,27 @@ function Index() {
             axios.request({method, url, withCredentials, headers}).then(response => {
                 console.log('Index.useEffect() response is ', response);
                 setAppUser((appUser) => ({...appUser, ...response.data}));
-            })
-            //    .catch(error => { setAppUser(null); setLoggedIn(false); })
-                .catch( (error) => { // Error
-        console.log('Index useEffect catch error error is ', error);
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            // console.log('postSignup catch if error.response is', error.response);
-            // console.log('error.response.data is ', error.response.data);
-            // console.log('error.response.data keys is ', Object.keys(error.response.data));
-            // const errMsgs = Object.values(error.response.data).join(':');
-            // console.log('error.response.status is ', error.response.status);
-            // console.log('error.ressponse.headers is ', error.response.headers);
-            setErrorMessage(Object.values(error.response.data).join(':'));
-        } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the
-            // browser and an instance of
-            // http.ClientRequest in node.js
-            console.log('postSignup catch error error.request is ', error.request);
-            setErrorMessage('postSignup catch error error.request is '+ error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('ELSE Error', error.message);
-            setErrorMessage(error.message)
-        }
-        console.log('Index() useEffect catch error', error.config);
-    });
-}
-}, [key]);
+            }).catch( (error) => { // Error
+                console.log('Index useEffect catch error error is ', error);
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    setErrorMessage(Object.values(error.response.data).join(':'));
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the
+                    // browser and an instance of
+                    // http.ClientRequest in node.js
+                    console.log('postSignup catch error error.request is ', error.request);
+                    setErrorMessage('postSignup catch error error.request is '+ error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('ELSE Error', error.message);
+                    setErrorMessage(error.message)
+                }
+                console.log('Index() useEffect catch error', error.config);
+            });
+        }}, [key]);
 // }, [authTokens]);
 // const isAuthenticated = useAuth();
 return key ? (
