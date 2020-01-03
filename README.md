@@ -160,4 +160,8 @@ to use js-cookie I install as per the doc:
 ```
 npm i js-cookie
 ```
+also since we are using Typescript I needed to install
 
+```
+npm install @types/js-cookie
+```
