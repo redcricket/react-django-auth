@@ -13,10 +13,11 @@ function Index() {
     const [errorMessage, setErrorMessage] = useState("");
     // const {authTokens} = useAuth();
     const key = sessionStorage.getItem('key');
-    console.log('Index() before useEffect key is, ', key);
-    console.log('Index() before useEffect appUser is, ', appUser);
+    //console.log('Index() before useEffect key is, ', key);
+    //console.log('Index() before useEffect appUser is, ', appUser);
     useEffect(()=> {
-        if (key) {
+        // if (key) {
+        if (appUser.pk === -1) {
             const url = 'http://localhost:8000/rest-auth/user/';
             const withCredentials = true;
             const method = 'get';
@@ -42,10 +43,11 @@ function Index() {
                 "Authorization": "Token " + key + " "
             };
             axios.request({method, url, withCredentials, headers}).then(response => {
-                console.log('Index.useEffect() response is ', response);
+                //console.log('Index.useEffect() response is ', response);
+                //console.log('Index() useEffect setting appUser.');
                 setAppUser((appUser) => ({...appUser, ...response.data}));
             }).catch( (error) => { // Error
-                console.log('Index useEffect catch error error is ', error);
+                //console.log('Index useEffect catch error error is ', error);
                 if (error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
@@ -55,16 +57,17 @@ function Index() {
                     // `error.request` is an instance of XMLHttpRequest in the
                     // browser and an instance of
                     // http.ClientRequest in node.js
-                    console.log('postSignup catch error error.request is ', error.request);
+                    //console.log('postSignup catch error error.request is ', error.request);
                     setErrorMessage('postSignup catch error error.request is '+ error.request);
                 } else {
                     // Something happened in setting up the request that triggered an Error
-                    console.log('ELSE Error', error.message);
+                    //console.log('ELSE Error', error.message);
                     setErrorMessage(error.message)
                 }
-                console.log('Index() useEffect catch error', error.config);
+                //console.log('Index() useEffect catch error', error.config);
             });
-        }}, [key]);
+        }}, []);
+        // }}, [key]);
 // }, [authTokens]);
 // const isAuthenticated = useAuth();
 return key ? (
@@ -95,7 +98,7 @@ function Product({ match }: RouteComponentProps<TParams>) {
 function ConfirmEmail({ match }: RouteComponentProps<TParams>) {
     const [, setIsError] = useState(false);
     const [emailConfirmed, setEmailConfirmed] = useState(false);
-    console.log('ConfirmEmail match is :', match);
+    //console.log('ConfirmEmail match is :', match);
     useEffect(()=> {
         if( ! emailConfirmed ) {
             const url = 'http://localhost:8000/rest-auth/registration/verify-email/';
@@ -110,15 +113,15 @@ function ConfirmEmail({ match }: RouteComponentProps<TParams>) {
             };
             axios.request({url, withCredentials, data, method, headers}).then(
                 result => {
-                    console.log('ConfirmEmail result is :', result);
+                    //console.log('ConfirmEmail result is :', result);
                     if (result.status === 200) {
-                        console.log('ConfirmEmail status 200 result is :', result);
+                        //console.log('ConfirmEmail status 200 result is :', result);
                         setEmailConfirmed(result.data.detail)
                     } else {
                         setIsError(true);
                     }
                 }).catch(e => {
-                console.log('ConfirmEmail.catch e is :', e);
+                //console.log('ConfirmEmail.catch e is :', e);
                 setIsError(true);
             });
         }
@@ -159,7 +162,7 @@ function Logout () {
         const data = null;
         axios.request({url, withCredentials, data, method, headers}).then(
             result => {
-                console.log('Logout result is :', result);
+                //console.log('Logout result is :', result);
                 if (result.status === 200) {
                     setAuthTokens(null);
                     setUserName("");
@@ -175,12 +178,13 @@ function Logout () {
 function Admin () {
   // const {authTokens, setAuthTokens} = useAuth();
   // const [isError, setIsError] = useState(false);
+  const appUser = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
   return (
       <Router>
           <div>
               <nav>
                   <ul>
-                      <li> <Link to="/logout">Logout</Link> </li>
+                      <li> <Link to="/logout">Logout email={JSON.stringify(appUser)}</Link> </li>
                   </ul>
               </nav>
               <PrivateRoute path="/logout" component={Logout} />
@@ -232,20 +236,20 @@ function Signup () {
         // password is being passed unencrypted and in the clear.
         axios.request({url, withCredentials, data, method, headers}).then(
             result => {
-                console.log('Signup.postSignup result is :', result);
+                //console.log('Signup.postSignup result is :', result);
                 if (result.status === 201) {
                     setIsSignedUp(true);
                     setAuthTokens(result.data);
                     return <Redirect to={location}/>
                 } else {
-                    console.log('Signup.pistSignup else result is ', result)
+                    //console.log('Signup.pistSignup else result is ', result)
                     setIsError(true);
                     if ( result.data.username ) {
                         setErrorMessage(result.data.username);
                     }
                 }
             }).catch( (error) => { // Error
-                console.log('postSign up catch error error is ', error);
+                //console.log('postSign up catch error error is ', error);
                 if (error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
@@ -326,8 +330,9 @@ function Login (props: RouteComponentProps<TParams>) {
                 "Authorization": "Token " + authTokens['key'] + " "
             };
             axios.request({method, url, withCredentials, headers}).then(response => {
-                console.log('Login() /rest-auth/user response is ', response);
+                //console.log('Login() /rest-auth/user response is ', response);
                 // setAppUser({...appUser, ...response.data});
+                //console.log('Login() useEffect setting appUser.');
                 setAppUser((appUser) => ({...appUser, ...response.data}));
                 setLoggedIn(true);
             })
@@ -348,7 +353,7 @@ function Login (props: RouteComponentProps<TParams>) {
                 if (result.status === 200) {
                     // sessionStorage.setItem('key', JSON.stringify(result.data['key']));
                     sessionStorage.setItem('key', result.data['key']);
-                    console.log('XXX postLogin setting key to :', result.data['key']);
+                    //console.log('XXX postLogin setting key to :', result.data['key']);
                     setAuthTokens(result.data);
                 } else {
                     setIsError(true);
@@ -359,8 +364,8 @@ function Login (props: RouteComponentProps<TParams>) {
   if (authTokens) {
     return <Redirect to={referer}/>;
   } else {
-    console.log('Login page authTokens is ', authTokens);
-    console.log('Login page appUser is ', appUser);
+    //console.log('Login page authTokens is ', authTokens);
+    //console.log('Login page appUser is ', appUser);
   }
 
   return (
@@ -387,7 +392,8 @@ function Login (props: RouteComponentProps<TParams>) {
 
 
 const App: React.FunctionComponent = () => {
-    const [authTokens, setAuthTokens] = useState(undefined);  //type: AuthTokens | undefined (see auth.js)
+    const [authTokens, setAuthTokens] = useState(undefined);
+    // type: AuthTokens | undefined (see auth.js)
     // <AuthContext.Provider value={false}>
     return (
       <AuthContext.Provider value={{ authTokens, setAuthTokens }}>
