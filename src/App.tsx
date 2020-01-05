@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { BrowserRouter as Router, Route, Link, RouteComponentProps, Redirect } from 'react-router-dom';
 import {AuthContext, useAuth} from "./context/auth";
+import {UserContext, useUser} from "./context/user";
 import './App.css';
 import PrivateRoute from "./PrivateRoute";
 import logoImg from "./img/logo.svg";
@@ -9,12 +10,19 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 function Index() {
-    const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+    // const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+    const {appUser, setAppUser} = useUser();
     const [errorMessage, setErrorMessage] = useState("");
     // const {authTokens} = useAuth();
     const key = sessionStorage.getItem('key');
     //console.log('Index() before useEffect key is, ', key);
     //console.log('Index() before useEffect appUser is, ', appUser);
+
+    /*
+     * This is why react sucks.  You have to follow "hook rules" or "rules of hooks".
+     * So you cannot take the block of code after the if(appUser.pk === -1 )
+     * and place it in a function.  This forces one to violate wet/dry programming.
+     */
     useEffect(()=> {
         // if (key) {
         if (appUser.pk === -1) {
@@ -45,7 +53,8 @@ function Index() {
             axios.request({method, url, withCredentials, headers}).then(response => {
                 //console.log('Index.useEffect() response is ', response);
                 //console.log('Index() useEffect setting appUser.');
-                setAppUser((appUser) => ({...appUser, ...response.data}));
+                // setAppUser((appUser) => ({...appUser, ...response.data}));
+                setAppUser(response.data);
             }).catch( (error) => { // Error
                 //console.log('Index useEffect catch error error is ', error);
                 if (error.response) {
@@ -67,9 +76,6 @@ function Index() {
                 //console.log('Index() useEffect catch error', error.config);
             });
         }}, []);
-        // }}, [key]);
-// }, [authTokens]);
-// const isAuthenticated = useAuth();
 return key ? (
     <h2>{errorMessage} Home you are logged in. {appUser.first_name || 'No first name'} email is {appUser.email}</h2>
     ) : (
@@ -89,6 +95,7 @@ return key ? (
         </Router>
     );
 }
+
 type TParams = { id: string };
 
 function Product({ match }: RouteComponentProps<TParams>) {
@@ -176,15 +183,15 @@ function Logout () {
 }
 
 function Admin () {
-  // const {authTokens, setAuthTokens} = useAuth();
-  // const [isError, setIsError] = useState(false);
-  const appUser = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+  // const {appUser, setAppUser} = useUser();
+  // const user = sessionStorage.getItem('user');
+  const user = JSON.parse(sessionStorage.user);
   return (
       <Router>
           <div>
               <nav>
                   <ul>
-                      <li> <Link to="/logout">Logout email={JSON.stringify(appUser)}</Link> </li>
+                      <li> <Link to="/logout">Logout email {user!.email}</Link> </li>
                   </ul>
               </nav>
               <PrivateRoute path="/logout" component={Logout} />
@@ -317,7 +324,8 @@ function Login (props: RouteComponentProps<TParams>) {
   const {authTokens, setAuthTokens} = useAuth();
   const [isError, setIsError] = useState(false);
   const referer = props.location.state ? props.location.state.referer : '/';
-  const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+  //const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+  const {appUser, setAppUser} = useUser();
   const [isLoggedIn, setLoggedIn] = useState(false);
 
   useEffect(()=> {
@@ -333,7 +341,10 @@ function Login (props: RouteComponentProps<TParams>) {
                 //console.log('Login() /rest-auth/user response is ', response);
                 // setAppUser({...appUser, ...response.data});
                 //console.log('Login() useEffect setting appUser.');
-                setAppUser((appUser) => ({...appUser, ...response.data}));
+                // setAppUser((appUser) => ({...appUser, ...response.data}));
+                setAppUser(response.data);
+                // HERE
+                sessionStorage.setItem('user', JSON.stringify(response.data));
                 setLoggedIn(true);
             })
             //    .catch(error => { setAppUser(null); setLoggedIn(false); })
@@ -393,9 +404,12 @@ function Login (props: RouteComponentProps<TParams>) {
 
 const App: React.FunctionComponent = () => {
     const [authTokens, setAuthTokens] = useState(undefined);
+    const [appUser, setAppUser] = useState({pk:-1, username: '', email: '', first_name: '', last_name:''});
+    // const {appUser, setAppUser} = useUser();
     // type: AuthTokens | undefined (see auth.js)
     // <AuthContext.Provider value={false}>
     return (
+    <UserContext.Provider value={{ appUser, setAppUser}}>
       <AuthContext.Provider value={{ authTokens, setAuthTokens }}>
         <Router>
           <div>
@@ -417,6 +431,7 @@ const App: React.FunctionComponent = () => {
           </div>
         </Router>
       </AuthContext.Provider>
+    </UserContext.Provider>
   );
 };
 
